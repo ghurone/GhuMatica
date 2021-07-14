@@ -11,21 +11,6 @@ class TipoInvalido(Error):
         super().__init__(msg)
 
 
-class IntervaloInvalido(Error):
-    def __init__(self, msg):
-        super().__init__(msg)
-
-
-class FechadoError(Error):
-    def __init__(self, msg):
-        super().__init__(msg)
-
-
-class MatrizError(Error):
-    def __init__(self, msg):
-        super().__init__(msg)
-
-
-class VetorError(Error):
+class ArrayError(Error):
     def __init__(self, msg):
         super().__init__(msg)
