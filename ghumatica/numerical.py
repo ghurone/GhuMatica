@@ -30,10 +30,16 @@ class Complex:
         return str(self)
 
     def __int__(self):
-        return Complex(int(self._re), int(self._im))
+        if self._im != 0:
+            return Complex(int(self._re), int(self._im))
+
+        return int(self._re)
 
     def __float__(self):
-        return Complex(float(self._re), float(self._im))
+        if self._im != 0:
+            return Complex(float(self._re), float(self._im))
+
+        return float(self._re)
 
     def __eq__(self, other):
         if isinstance(other, (int, float)):
@@ -208,6 +214,9 @@ class Complex:
             raise TypeError('')
 
         return Complex(re, im)
+
+    def conjugate(self):
+        return self.conjugado
 
     @property
     def conjugado(self):
