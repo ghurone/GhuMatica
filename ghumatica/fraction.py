@@ -11,6 +11,10 @@ class Fraction:
         return super(Fraction, cls).__new__(cls)
 
     def __init__(self, num, den=1):
+        
+        self.numerador = num
+        self.denominador = den
+        
         if isinstance(num, float) or isinstance(den, float):
             num = float_to_frac(num)
             den = float_to_frac(den)

@@ -13,7 +13,7 @@ def simplify(n1:int, n2:int) -> tuple:
 def float_to_frac(num:float) -> tuple:
     num_str = str(num)
 
-    if num_str.isnumeric():
+    if isnumber(num_str):
         if '.' in num_str:
             num_split = num_str.split('.')
             
@@ -44,3 +44,12 @@ def prime_factors(n:int) -> list:
         factors.append(n)
 
     return factors
+
+
+def isnumber(num:str) -> bool:
+    try:
+        float(num)
+        int(float(num))
+        return True
+    except:
+        return False
