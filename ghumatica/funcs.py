@@ -1,4 +1,5 @@
 def simplify(n1:int, n2:int) -> tuple:
+    """ Passados dois número inteiros, ele retorna a simplificação da divisão por um fator comum"""
     a = n1
     b = n2
     r = 1
@@ -10,16 +11,15 @@ def simplify(n1:int, n2:int) -> tuple:
     return int(n1 / a), int(n2 / a)
 
 
-def float_to_frac(num:float) -> tuple:
+def float_to_rational(num:float) -> tuple:
     num_str = str(num)
-
-    if isnumber(num_str):
+    if is_number(num_str):
         if '.' in num_str:
             num_split = num_str.split('.')
             
             if len(num_split) == 2:
                 tam_dec = len(num_split[1])
-                dec = int('1' + tam_dec * '0')
+                dec = 10**tam_dec 
                 numerador = int(str(num_split[0]) + str(num_split[1]))
                 
                 return numerador, dec
@@ -45,11 +45,33 @@ def prime_factors(n:int) -> list:
 
     return factors
 
+# FUNÇÕES PARA VERIFICAR O TIPO DO NÚMERO #
 
-def isnumber(num:str) -> bool:
-    try:
-        float(num)
-        int(float(num))
-        return True
-    except:
-        return False
+def is_number(num) -> bool:
+    if not isinstance(num, (int, float)):
+        if not isinstance(num, str):
+            return False
+        
+        try:
+            float(num)
+            return True
+        except:
+            return False
+
+    return True
+
+
+def is_integer(num) -> bool:
+    if is_number(num):
+        if int(float(num)) == float(num):
+            return True
+    
+    return False
+
+
+def is_float(num) -> bool:
+    if is_number(num):
+        if not is_integer(num):
+            return True
+        
+    return False

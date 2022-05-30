@@ -1,61 +1,68 @@
-from funcs import simplify, float_to_frac
+from ghumatica.funcs import simplify, float_to_rational, is_number
+
 
 class Fraction:
-    def __new__(cls, num, den=1):
-        if isinstance(num, (float, int)) and isinstance(den, (float, int)) and den != 0:
-            if abs(den) == 1 and isinstance(num, int):
-                return num * den
-        else:
-            raise TypeError('Os parâmetros ´num´ e ´den´ precisam ser do tipo númerico.')
-
-        return super(Fraction, cls).__new__(cls)
-
     def __init__(self, num, den=1):
+        if not (is_number(num) or is_number(den)):
+            raise TypeError('Os parâmetros `num` e `den` precisam ser numéricos!')
         
-        self.numerador = num
-        self.denominador = den
+        if den == 0:
+            raise ZeroDivisionError('O denominador não pode ser zero!!')
         
-        if isinstance(num, float) or isinstance(den, float):
-            num = float_to_frac(num)
-            den = float_to_frac(den)
-    
-            self.numerador = num[0] * den[1]
-            self.denominador = den[0] * num[1]
+        num = float_to_rational(num)
+        den = float_to_rational(den)
 
-        self.numerador, self.denominador = simplify(self.numerador, self.denominador)
+        self._num = num[0] * den[1]
+        self._den = den[0] * num[1]
+        
+        self._num, self._den = simplify(self._num, self._den)
+    
+    @property
+    def numerador(self):
+        return self._num
+    
+    @property
+    def denominador(self):
+        return self._den
 
     def __repr__(self):
-        return f'Fraction({self.numerador},{self.denominador})'
+        if self._num == 0:
+            return '0'
+        
+        if self._den == 1:
+            return f'{self._num}'
+        
+        return f'Fraction({self._num},{self._den})'
 
     def __str__(self):
-        return f'{self.numerador}/{self.denominador}'
+        return f'{self._num}/{self._den}'
 
     def __int__(self):
-        return int(self.numerador / self.denominador)
+        return int(self._num / self._den)
 
     def __float__(self):
-        return self.numerador / self.denominador
+        return self._num / self._den
 
     def __add__(self, other):
         if isinstance(other, Fraction):
-            if other.denominador != self.denominador:
-                den = self.denominador * other.denominador
-                num = self.denominador * other.numerador + self.numerador * other.denominador
+            if other._den != self._den:
+                den = self._den * other._den
+                num = self._den * other._num + self._num * other._den
 
             else:
-                den = self.denominador
-                num = self.numerador + other.numerador
+                den = self._den
+                num = self._num + other._num
 
         elif isinstance(other, (int, float)):
-            numerador, denominador = self.float_to_frac(other)
+            numerador, denominador = float_to_rational(other)
 
-            if self.denominador != denominador:
-                den = self.denominador * denominador
-                num = self.denominador * numerador + self.numerador * denominador
+            if self._den != denominador:
+                den = self._den * denominador
+                num = self._den * numerador + self._num * denominador
 
             else:
-                den = self.denominador
-                num = self.numerador + numerador
+                den = self._den
+                num = self._num + numerador
 
         else:
             raise TypeError('A soma precisa ser numérica.')
@@ -75,15 +82,15 @@ class Fraction:
 
     def __mul__(self, other):
         if isinstance(other, Fraction):
-            den = self.denominador * other.denominador
-            num = self.numerador * other.numerador
+            den = self._den * other._den
+            num = self._num * other._num
 
         elif isinstance(other, (int, float)):
             if other == 0:
                 return 0
 
-            den = self.denominador
-            num = self.numerador * other
+            den = self._den
+            num = self._num * other
 
         else:
             raise TypeError('A multiplicação precisa ser numérica.')
@@ -97,12 +104,12 @@ class Fraction:
 
     def __truediv__(self, other):
         if isinstance(other, Fraction):
-            den = self.denominador * other.numerador
-            num = self.numerador * other.denominador
+            den = self._den * other._num
+            num = self._num * other._den
 
-        elif isinstance(other, float):
-            den = self.denominador * other
-            num = self.numerador
+        elif isinstance(other, (int, float)):
+            den = self._den * other
+            num = self._num
 
         else:
             raise TypeError('A divisão precisa ser numérica.')
@@ -112,16 +119,16 @@ class Fraction:
         return Fraction(num, den)
 
     def __rtruediv__(self, other):
-        return other * Fraction(self.denominador, self.numerador)
+        return other * Fraction(self._den, self._num)
 
     def __floordiv__(self, other):
         if isinstance(other, Fraction):
-            return (self.numerador * other.denominador) // (self.denominador * other.numerador)
+            return (self._num * other._den) // (self._den * other._num)
         elif isinstance(other, (float, int)):
-            return self.numerador // (self.denominador * other)
+            return self._num // (self._den * other)
 
     def __rfloordiv__(self, other):
-        return (other * self.denominador) // self.numerador
+        return (other * self._den) // self._num
 
     def __pow__(self, outra):
         return self.__float__() ** outra.__float__()
@@ -130,32 +137,29 @@ class Fraction:
         return outra.__float__() ** self.__float__()
 
     def __pos__(self):
-        return Fraction(self.numerador, self.denominador)
+        return self
 
     def __neg__(self):
-        return Fraction(-self.numerador, self.denominador)
+        return Fraction(-self._num, self._den)
 
     def __abs__(self):
-        return Fraction(abs(self.numerador), self.denominador)
+        return Fraction(abs(self._num), abs(self._den))
 
     def __trunc__(self):
-        if self.numerador < 0:
-            return abs(self.numerador) // self.denominador
-        else:
-            return self.numerador // self.denominador
+        return abs(self._num) // self._den
 
     def __floor__(self):
-        return self.numerador // self.denominador
+        return self._num // self._den
 
     def __ceil__(self):
-        return -(-self.numerador // self.denominador)
+        return -(-self._num // self._den)
 
     def __round__(self, ndigits=None):
         if ndigits is None:
-            floor, remainder = divmod(self.numerador, self.denominador)
-            if remainder * 2 < self.denominador:
+            floor, remainder = divmod(self._num, self._den)
+            if remainder * 2 < self._den:
                 return floor
-            elif remainder * 2 > self.denominador:
+            elif remainder * 2 > self._den:
                 return floor + 1
             elif floor % 2 == 0:
                 return floor
@@ -187,4 +191,4 @@ class Fraction:
         return self.__float__() >= outra.__float__()
 
     def __bool__(self, outra):
-        return bool(self.numerador)
+        return bool(self._num)
