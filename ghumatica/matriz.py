@@ -32,6 +32,24 @@ def valid_matrix(matrix) -> bool:
     return False
 
 
+class Linha:
+    def __init__(self, linha) -> None:
+        self.linha = linha
+
+    def __add__(self, other):
+        if isinstance(other, Linha) and len(other) == len(self):
+            a = [other[i] + self[i] for i in range(len(self))]
+            return Linha(a)
+
+        raise ValueError('Algo de errado!')
+        
+    def __getitem__(self, i):
+        return self.linha[i]
+    
+    def __len__(self):
+        return len(self.linha)        
+    
+
 class Matriz:
     def __init__(self, matriz, shape=None, valor=None) -> None:
         if shape:
@@ -46,13 +64,13 @@ class Matriz:
             else:
                 raise ValueError('O parâmetro `valor` precisa ser numérico.')
             
-            self._matriz = [[valor for _ in self._ncol] for _ in self._nlin]
+            self._matriz = [Linha([valor for _ in self._ncol]) for _ in self._nlin]
             
         elif matriz:
             if valid_matrix(matriz):
-                self._matriz = matriz
                 self._shape = len(matriz), len(matriz[0])
                 self._nlin, self._ncol = self._shape
+                self._matriz = [Linha(matriz[i]) for i in self._nlin] 
             else:
                 raise ValueError('O parâmetro `matriz` está errado')
                 
@@ -78,7 +96,7 @@ class Matriz:
     def __add__(self, other: object) -> object:
         if isinstance(other, Matriz):
             if self.shape == other.shape:
-                mat = [[self._matriz[i][j] + other._matriz[i][j] for j in range(self._ncol)] for i in range(self._nlin)]
+                mat = [ self._matriz[i] + other._matriz[i] for i in range(self._nlin) ]
                 return Matriz(mat)
             
             raise ValueError('As matrizes tem formatos diferentes!')
